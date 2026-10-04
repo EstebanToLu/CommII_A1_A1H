@@ -1,0 +1,882 @@
+options:
+  parameters: {author: 'Grupo E1 - Rincon, Veloza, Torres', catch_exceptions: 'True', category: '[GRC Hier Blocks]', cmake_opt: '', comment: '', copyright: '', description: 'Fase 2: Tx BFSK / canal AWGN + interferencia / Rx no coherente y BER', gen_cmake: 'On', gen_linking: dynamic, generate_options: qt_gui, hier_block_src_path: '.:', id: FSK_TxRx_Interferencia, max_nouts: '0', output_language: python, placement: '(0,0)', qt_qss_theme: '', realtime_scheduling: '', run: 'True', run_command: '{python} -u {filename}', run_options: prompt, sizing_mode: fixed, thread_safe_setters: '', title: 'FSK Tx-Canal-Rx con AWGN e interferencia (Fase 2, E1)', window_size: '(1400,900)'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 8]
+    rotation: 0
+    state: enabled
+blocks:
+- name: samp_rate
+  id: variable
+  parameters: {comment: samp_rate = Rb*sps = 480 kHz, value: Rb*sps}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [200, 8]
+    rotation: 0
+    state: enabled
+- name: Rb
+  id: variable
+  parameters: {comment: 'Fase 1 (E1): Rb = 4.8 kbps (BFSK: Rs = Rb)', value: '4800'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [320, 8]
+    rotation: 0
+    state: enabled
+- name: sps
+  id: variable
+  parameters: {comment: '', value: '100'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [420, 8]
+    rotation: 0
+    state: enabled
+- name: fsk_deviation
+  id: variable
+  parameters: {comment: 'Fase 1 (E1): desviacion de frecuencia 20 kHz
+
+      marca = +df, espacio = -df', value: 20e3}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [520, 8]
+    rotation: 0
+    state: enabled
+- name: noise_amp
+  id: variable
+  parameters: {comment: 'Potencia de la senal = 1 (envolvente constante)
+
+      Eb/N0 = (1/Rb)/(sigma^2/samp_rate) = sps/sigma^2', value: math.sqrt(sps/(10**(EbN0_dB/10.0)))}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [200, 96]
+    rotation: 0
+    state: enabled
+- name: A_int
+  id: variable
+  parameters: {comment: Amplitud del tono interferente (P_s = 1), value: int_on*10**(-SIR_dB/20.0)}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [420, 96]
+    rotation: 0
+    state: enabled
+- name: ber_len
+  id: variable
+  parameters: {comment: Ventana de promediado del BER (bits), value: '20000'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [600, 96]
+    rotation: 0
+    state: enabled
+- name: EbN0_dB
+  id: variable_qtgui_range
+  parameters: {comment: '', label: '"Eb/N0 (dB)"', value: '10', start: '-2', stop: '20', step: '0.5', widget: counter_slider, rangeType: float, orient: QtCore.Qt.Horizontal, min_len: '200', gui_hint: '0,0,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 8]
+    rotation: 0
+    state: enabled
+- name: int_on
+  id: variable_qtgui_check_box
+  parameters: {comment: '', label: '"Interferencia co-canal (tono)"', type: int, value: '0', 'true': '1', 'false': '0', gui_hint: '1,0,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [960, 8]
+    rotation: 0
+    state: enabled
+- name: SIR_dB
+  id: variable_qtgui_range
+  parameters: {comment: '', label: '"SIR tono (dB)"', value: '10', start: '-10', stop: '30', step: '1', widget: counter_slider, rangeType: float, orient: QtCore.Qt.Horizontal, min_len: '200', gui_hint: '1,1,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1160, 8]
+    rotation: 0
+    state: enabled
+- name: f_int
+  id: variable_qtgui_range
+  parameters: {comment: '', label: '"Frecuencia tono (Hz)"', value: 20e3, start: -100e3, stop: 100e3, step: 1e3, widget: counter_slider, rangeType: float, orient: QtCore.Qt.Horizontal, min_len: '200', gui_hint: '1,2,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1360, 8]
+    rotation: 0
+    state: enabled
+- name: imp_on
+  id: variable_qtgui_check_box
+  parameters: {comment: '', label: '"Ruido impulsivo industrial"', type: int, value: '0', 'true': '1', 'false': '0', gui_hint: '2,0,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [960, 96]
+    rotation: 0
+    state: enabled
+- name: imp_amp
+  id: variable_qtgui_range
+  parameters: {comment: '', label: '"Amplitud RMS impulsos"', value: '50', start: '0', stop: '200', step: '1', widget: counter_slider, rangeType: float, orient: QtCore.Qt.Horizontal, min_len: '200', gui_hint: '2,1,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1160, 96]
+    rotation: 0
+    state: enabled
+- name: p_imp
+  id: variable_qtgui_range
+  parameters: {comment: '', label: '"Prob. impulso por muestra"', value: '0.002', start: '0', stop: '0.02', step: '0.0005', widget: counter_slider, rangeType: float, orient: QtCore.Qt.Horizontal, min_len: '200', gui_hint: '2,2,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1360, 186]
+    rotation: 0
+    state: enabled
+- name: B_carson_lbl
+  id: variable_qtgui_label
+  parameters: {comment: '', label: '"B Carson (Hz)"', value: 2*(fsk_deviation+Rb), type: real, formatter: None, gui_hint: '0,1,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1360, 96]
+    rotation: 0
+    state: enabled
+- name: h_lbl
+  id: variable_qtgui_label
+  parameters: {comment: '', label: '"Indice h = 2*df/Rb"', value: 2*fsk_deviation/Rb, type: real, formatter: None, gui_hint: '0,2,1,1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1560, 96]
+    rotation: 0
+    state: enabled
+- name: imports
+  id: import
+  parameters: {comment: '', imports: import math}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 120]
+    rotation: 0
+    state: enabled
+- name: tabs
+  id: qtgui_tab_widget
+  parameters: {comment: '', num_tabs: '5', label0: '''Tiempo''', label1: '''PSD''', label2: '''Constelacion / espacio de decision''', label3: '''Frecuencia instantanea''', label4: '''Estadistico de decision y BER''', gui_hint: '3,0,1,3', label5: '''Tab 5''', label6: '''Tab 6''', label7: '''Tab 7''', label8: '''Tab 8''', label9: '''Tab 9''', label10: '''Tab 10''', label11: '''Tab 11''', label12: '''Tab 12''', label13: '''Tab 13''', label14: '''Tab 14''', label15: '''Tab 15''', label16: '''Tab 16''', label17: '''Tab 17''', label18: '''Tab 18''', label19: '''Tab 19'''}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 200]
+    rotation: 0
+    state: enabled
+- name: bits_src
+  id: analog_random_source_x
+  parameters: {comment: '', type: byte, min: '0', max: '2', num_samps: '65536', repeat: 'True'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [8, 320]
+    rotation: 0
+    state: enabled
+- name: nrz
+  id: digital_chunks_to_symbols_xx
+  parameters: {comment: 'bit 0 -> -1 (espacio, -df)
+
+      bit 1 -> +1 (marca, +df)', in_type: byte, out_type: float, symbol_table: '[-1.0, 1.0]', dimension: '1', num_ports: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [200, 320]
+    rotation: 0
+    state: enabled
+- name: rep
+  id: blocks_repeat
+  parameters: {comment: '', type: float, interp: sps, vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [400, 320]
+    rotation: 0
+    state: enabled
+- name: fsk_mod
+  id: analog_frequency_modulator_fc
+  parameters: {comment: CPFSK (fase continua), sensitivity: 2*math.pi*fsk_deviation/samp_rate}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 320]
+    rotation: 0
+    state: enabled
+- name: throttle
+  id: blocks_throttle2
+  parameters: {comment: '', type: complex, samples_per_second: samp_rate, ignoretag: 'True', vlen: '1', limit: auto, maximum: '0.1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 320]
+    rotation: 0
+    state: enabled
+- name: awgn
+  id: analog_noise_source_x
+  parameters: {comment: '', type: complex, noise_type: analog.GR_GAUSSIAN, amp: noise_amp, seed: '0'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 520]
+    rotation: 0
+    state: enabled
+- name: tono_int
+  id: analog_sig_source_x
+  parameters: {comment: Interferencia co-canal ISM 433 MHz (banda estrecha), type: complex, samp_rate: samp_rate, waveform: analog.GR_COS_WAVE, freq: f_int, amp: A_int, offset: '0', phase: '0', showports: 'False'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 640]
+    rotation: 0
+    state: enabled
+- name: imp_gauss
+  id: analog_noise_source_x
+  parameters: {comment: 'Ruido impulsivo Bernoulli-Gauss
+
+      (motores, variadores, arcos)
+
+      /sqrt(2): la compuerta es (1+j)', type: complex, noise_type: analog.GR_GAUSSIAN, amp: imp_on*imp_amp/math.sqrt(2), seed: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 760]
+    rotation: 0
+    state: enabled
+- name: imp_unif
+  id: analog_noise_source_x
+  parameters: {comment: '', type: float, noise_type: analog.GR_UNIFORM, amp: '1', seed: '2'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [360, 860]
+    rotation: 0
+    state: enabled
+- name: imp_gate
+  id: blocks_threshold_ff
+  parameters: {comment: 1 con probabilidad p_imp, low: 1-2*p_imp, high: 1-2*p_imp, init: '0'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [560, 860]
+    rotation: 0
+    state: enabled
+- name: imp_gate_c
+  id: blocks_float_to_complex
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 860]
+    rotation: 0
+    state: enabled
+- name: impulsos
+  id: blocks_multiply_xx
+  parameters: {comment: '', type: complex, num_inputs: '2', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [760, 760]
+    rotation: 0
+    state: enabled
+- name: suma_int
+  id: blocks_add_xx
+  parameters: {comment: '', type: complex, num_inputs: '2', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1000, 680]
+    rotation: 0
+    state: enabled
+- name: rx_sin_ruido
+  id: blocks_add_xx
+  parameters: {comment: Tx + interferencia (sin AWGN), type: complex, num_inputs: '2', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1160, 580]
+    rotation: 0
+    state: enabled
+- name: canal
+  id: blocks_add_xx
+  parameters: {comment: Salida del canal = Tx + AWGN + interferencia, type: complex, num_inputs: '3', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1160, 460]
+    rotation: 0
+    state: enabled
+- name: tx_rot1
+  id: blocks_rotator_cc
+  parameters: {comment: '', phase_inc: -2*math.pi*fsk_deviation/samp_rate}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 320]
+    rotation: 0
+    state: enabled
+- name: tx_rot0
+  id: blocks_rotator_cc
+  parameters: {comment: '', phase_inc: 2*math.pi*fsk_deviation/samp_rate}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 400]
+    rotation: 0
+    state: enabled
+- name: tx_int1
+  id: blocks_moving_average_xx
+  parameters: {comment: '', type: complex, length: sps, scale: 1.0/sps, max_iter: '4000', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 320]
+    rotation: 0
+    state: enabled
+- name: tx_int0
+  id: blocks_moving_average_xx
+  parameters: {comment: '', type: complex, length: sps, scale: 1.0/sps, max_iter: '4000', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 400]
+    rotation: 0
+    state: enabled
+- name: tx_env1
+  id: blocks_complex_to_mag
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1800, 320]
+    rotation: 0
+    state: enabled
+- name: tx_env0
+  id: blocks_complex_to_mag
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1800, 400]
+    rotation: 0
+    state: enabled
+- name: tx_m1
+  id: blocks_keep_one_in_n
+  parameters: {comment: '', type: float, n: sps, vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1960, 320]
+    rotation: 0
+    state: enabled
+- name: tx_m0
+  id: blocks_keep_one_in_n
+  parameters: {comment: '', type: float, n: sps, vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1960, 400]
+    rotation: 0
+    state: enabled
+- name: tx_ed
+  id: blocks_float_to_complex
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2120, 360]
+    rotation: 0
+    state: enabled
+- name: rsr_rot1
+  id: blocks_rotator_cc
+  parameters: {comment: '', phase_inc: -2*math.pi*fsk_deviation/samp_rate}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 520]
+    rotation: 0
+    state: enabled
+- name: rsr_rot0
+  id: blocks_rotator_cc
+  parameters: {comment: '', phase_inc: 2*math.pi*fsk_deviation/samp_rate}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 600]
+    rotation: 0
+    state: enabled
+- name: rsr_int1
+  id: blocks_moving_average_xx
+  parameters: {comment: '', type: complex, length: sps, scale: 1.0/sps, max_iter: '4000', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 520]
+    rotation: 0
+    state: enabled
+- name: rsr_int0
+  id: blocks_moving_average_xx
+  parameters: {comment: '', type: complex, length: sps, scale: 1.0/sps, max_iter: '4000', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 600]
+    rotation: 0
+    state: enabled
+- name: rsr_env1
+  id: blocks_complex_to_mag
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1800, 520]
+    rotation: 0
+    state: enabled
+- name: rsr_env0
+  id: blocks_complex_to_mag
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1800, 600]
+    rotation: 0
+    state: enabled
+- name: rsr_m1
+  id: blocks_keep_one_in_n
+  parameters: {comment: '', type: float, n: sps, vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1960, 520]
+    rotation: 0
+    state: enabled
+- name: rsr_m0
+  id: blocks_keep_one_in_n
+  parameters: {comment: '', type: float, n: sps, vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1960, 600]
+    rotation: 0
+    state: enabled
+- name: rsr_ed
+  id: blocks_float_to_complex
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2120, 560]
+    rotation: 0
+    state: enabled
+- name: rx_rot1
+  id: blocks_rotator_cc
+  parameters: {comment: Baja la marca (+df) a 0 Hz, phase_inc: -2*math.pi*fsk_deviation/samp_rate}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 720]
+    rotation: 0
+    state: enabled
+- name: rx_rot0
+  id: blocks_rotator_cc
+  parameters: {comment: Baja el espacio (-df) a 0 Hz, phase_inc: 2*math.pi*fsk_deviation/samp_rate}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 800]
+    rotation: 0
+    state: enabled
+- name: rx_int1
+  id: blocks_moving_average_xx
+  parameters: {comment: Integrador sobre Tb (filtro acoplado), type: complex, length: sps, scale: 1.0/sps, max_iter: '4000', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 720]
+    rotation: 0
+    state: enabled
+- name: rx_int0
+  id: blocks_moving_average_xx
+  parameters: {comment: '', type: complex, length: sps, scale: 1.0/sps, max_iter: '4000', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1600, 800]
+    rotation: 0
+    state: enabled
+- name: rx_env1
+  id: blocks_complex_to_mag
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1800, 720]
+    rotation: 0
+    state: enabled
+- name: rx_env0
+  id: blocks_complex_to_mag
+  parameters: {comment: '', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1800, 800]
+    rotation: 0
+    state: enabled
+- name: rx_m1
+  id: blocks_keep_one_in_n
+  parameters: {comment: Muestreo al final de cada simbolo, type: float, n: sps, vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1960, 720]
+    rotation: 0
+    state: enabled
+- name: rx_m0
+  id: blocks_keep_one_in_n
+  parameters: {comment: '', type: float, n: sps, vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1960, 800]
+    rotation: 0
+    state: enabled
+- name: rx_ed
+  id: blocks_float_to_complex
+  parameters: {comment: 'Espacio de decision: I=|z_marca|, Q=|z_espacio|', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2120, 760]
+    rotation: 0
+    state: enabled
+- name: rx_dif
+  id: blocks_sub_xx
+  parameters: {comment: l = |z_marca| - |z_espacio|, type: float, num_inputs: '2', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2000, 900]
+    rotation: 0
+    state: enabled
+- name: tx_dif
+  id: blocks_sub_xx
+  parameters: {comment: '', type: float, num_inputs: '2', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2000, 380]
+    rotation: 0
+    state: enabled
+- name: slicer
+  id: digital_binary_slicer_fb
+  parameters: {comment: 'l > 0 -> 1, l < 0 -> 0'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2160, 900]
+    rotation: 0
+    state: enabled
+- name: rx_dec
+  id: blocks_keep_one_in_n
+  parameters: {comment: '', type: float, n: sps, vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2160, 980]
+    rotation: 0
+    state: enabled
+- name: xor_err
+  id: blocks_xor_xx
+  parameters: {comment: 'El receptor no introduce retardo:
+
+      bit k Rx se compara con bit k Tx', type: byte, num_inputs: '2'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2360, 1060]
+    rotation: 0
+    state: enabled
+- name: err_f
+  id: blocks_char_to_float
+  parameters: {comment: '', scale: '1', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2520, 1060]
+    rotation: 0
+    state: enabled
+- name: ber_avg
+  id: blocks_moving_average_xx
+  parameters: {comment: '', type: float, length: ber_len, scale: 1.0/ber_len, max_iter: '4000', vlen: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2680, 1060]
+    rotation: 0
+    state: enabled
+- name: ber_num
+  id: qtgui_number_sink
+  parameters: {comment: '', name: '"BER medido"', type: float, autoscale: 'False', avg: '0', graph_type: qtgui.NUM_GRAPH_HORIZ, nconnections: '1', min: '0', max: '0.5', update_time: '0.20', gui_hint: tabs@4, label1: '"BER"', unit1: '""', factor1: '1', color1: '("black", "black")', label2: '''''', label3: '''''', label4: '''''', label5: '''''', label6: '''''', label7: '''''', label8: '''''', label9: '''''', label10: '''''', unit2: '''''', unit3: '''''', unit4: '''''', unit5: '''''', unit6: '''''', unit7: '''''', unit8: '''''', unit9: '''''', unit10: '''''', color2: '("black", "black")', color3: '("black", "black")', color4: '("black", "black")', color5: '("black", "black")', color6: '("black", "black")', color7: '("black", "black")', color8: '("black", "black")', color9: '("black", "black")', color10: '("black", "black")', factor2: '1', factor3: '1', factor4: '1', factor5: '1', factor6: '1', factor7: '1', factor8: '1', factor9: '1', factor10: '1'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2880, 1060]
+    rotation: 0
+    state: enabled
+- name: ber_probe
+  id: blocks_probe_signal_x
+  parameters: {comment: '', type: float}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2880, 1160]
+    rotation: 0
+    state: enabled
+- name: lpf_disc
+  id: low_pass_filter
+  parameters: {comment: Ancho ~ Carson/2, type: fir_filter_ccf, decim: '1', interp: '1', gain: '1', samp_rate: samp_rate, cutoff_freq: fsk_deviation+Rb, width: Rb, win: window.WIN_HAMMING, beta: '6.76'}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 1000]
+    rotation: 0
+    state: enabled
+- name: disc_tx
+  id: analog_quadrature_demod_cf
+  parameters: {comment: '', gain: samp_rate/(2*math.pi*fsk_deviation)}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1640, 1100]
+    rotation: 0
+    state: enabled
+- name: disc_rx
+  id: analog_quadrature_demod_cf
+  parameters: {comment: '', gain: samp_rate/(2*math.pi*fsk_deviation)}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1640, 1000]
+    rotation: 0
+    state: enabled
+- name: t_env
+  id: qtgui_time_sink_x
+  parameters: {comment: '', type: complex, name: '"Envolvente compleja: Tx vs salida del canal"', size: '2048', srate: samp_rate, grid: 'True', autoscale: 'False', ymin: '-3', ymax: '3', nconnections: '2', update_time: '0.10', ylabel: '"Amplitud"', yunit: '""', legend: 'True', entags: 'False', ctrlpanel: 'False', axislabels: 'True', stemplot: 'False', tr_mode: qtgui.TRIG_MODE_FREE, tr_slope: qtgui.TRIG_SLOPE_POS, tr_level: '0.0', tr_delay: '0', tr_chan: '0', tr_tag: '""', gui_hint: tabs@0, label1: '"Re{Tx}"', label2: '"Im{Tx}"', label3: '"Re{canal}"', label4: '"Im{canal}"', label5: '''''', label6: '''''', label7: '''''', label8: '''''', label9: '''''', label10: ''''''}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 1240]
+    rotation: 0
+    state: enabled
+- name: psd
+  id: qtgui_freq_sink_x
+  parameters: {comment: '', type: complex, name: '"PSD: senal Tx vs ruido e interferencia"', fftsize: '4096', wintype: window.WIN_BLACKMAN_hARRIS, fc: '0', bw: samp_rate, grid: 'True', autoscale: 'False', average: '0.1', ymin: '-110', ymax: '20', units: dB, label: '"Densidad espectral de potencia"', nconnections: '4', update_time: '0.10', freqhalf: 'True', showports: 'False', legend: 'True', axislabels: 'True', norm_window: 'False', ctrlpanel: 'False', tr_mode: qtgui.TRIG_MODE_FREE, tr_level: '0.0', tr_chan: '0', tr_tag: '""', gui_hint: tabs@1, label1: '"Senal FSK Tx"', label2: '"AWGN"', label3: '"Interferencia"', label4: '"Salida del canal"', label5: '''''', label6: '''''', label7: '''''', label8: '''''', label9: '''''', label10: ''''''}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1400, 1380]
+    rotation: 0
+    state: enabled
+- name: const_iq
+  id: qtgui_const_sink_x
+  parameters: {comment: '', type: complex, name: '"Plano I/Q de la envolvente (FSK = circulo)"', size: '1024', grid: 'True', autoscale: 'False', xmin: '-3', xmax: '3', ymin: '-3', ymax: '3', nconnections: '3', update_time: '0.10', legend: 'True', axislabels: 'True', tr_mode: qtgui.TRIG_MODE_FREE, tr_slope: qtgui.TRIG_SLOPE_POS, tr_level: '0.0', tr_chan: '0', tr_tag: '""', gui_hint: tabs@2, style1: '0', style2: '0', style3: '0', style4: '0', style5: '0', style6: '0', style7: '0', style8: '0', style9: '0', style10: '0', marker1: '0', marker2: '0', marker3: '0', marker4: '0', marker5: '0', marker6: '0', marker7: '0', marker8: '0', marker9: '0', marker10: '0', label1: '"Tx"', label2: '"Rx sin ruido"', label3: '"Rx degradado"', label4: '''''', label5: '''''', label6: '''''', label7: '''''', label8: '''''', label9: '''''', label10: ''''''}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1700, 1240]
+    rotation: 0
+    state: enabled
+- name: const_dec
+  id: qtgui_const_sink_x
+  parameters: {comment: '', type: complex, name: '"Espacio de decision (|z_marca|, |z_espacio|)"', size: '1024', grid: 'True', autoscale: 'False', xmin: '-0.5', xmax: '2', ymin: '-0.5', ymax: '2', nconnections: '3', update_time: '0.10', legend: 'True', axislabels: 'True', tr_mode: qtgui.TRIG_MODE_FREE, tr_slope: qtgui.TRIG_SLOPE_POS, tr_level: '0.0', tr_chan: '0', tr_tag: '""', gui_hint: tabs@2, style1: '0', style2: '0', style3: '0', style4: '0', style5: '0', style6: '0', style7: '0', style8: '0', style9: '0', style10: '0', marker1: '0', marker2: '0', marker3: '0', marker4: '0', marker5: '0', marker6: '0', marker7: '0', marker8: '0', marker9: '0', marker10: '0', label1: '"Tx"', label2: '"Rx sin ruido"', label3: '"Rx degradado"', label4: '''''', label5: '''''', label6: '''''', label7: '''''', label8: '''''', label9: '''''', label10: ''''''}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [1700, 1400]
+    rotation: 0
+    state: enabled
+- name: t_freq
+  id: qtgui_time_sink_x
+  parameters: {comment: '', type: float, name: '"Frecuencia instantanea normalizada"', size: '4096', srate: samp_rate, grid: 'True', autoscale: 'False', ymin: '-3', ymax: '3', nconnections: '3', update_time: '0.10', ylabel: '"Amplitud"', yunit: '""', legend: 'True', entags: 'False', ctrlpanel: 'False', axislabels: 'True', stemplot: 'False', tr_mode: qtgui.TRIG_MODE_FREE, tr_slope: qtgui.TRIG_SLOPE_POS, tr_level: '0.0', tr_delay: '0', tr_chan: '0', tr_tag: '""', gui_hint: tabs@3, label1: '"Bits NRZ Tx"', label2: '"Discriminador Tx"', label3: '"Discriminador Rx"', label4: '''''', label5: '''''', label6: '''''', label7: '''''', label8: '''''', label9: '''''', label10: ''''''}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2000, 1240]
+    rotation: 0
+    state: enabled
+- name: t_dec
+  id: qtgui_time_sink_x
+  parameters: {comment: '', type: float, name: '"Estadistico de decision l = |z_marca| - |z_espacio|"', size: '2000', srate: samp_rate, grid: 'True', autoscale: 'False', ymin: '-2', ymax: '2', nconnections: '2', update_time: '0.10', ylabel: '"Amplitud"', yunit: '""', legend: 'True', entags: 'False', ctrlpanel: 'False', axislabels: 'True', stemplot: 'False', tr_mode: qtgui.TRIG_MODE_FREE, tr_slope: qtgui.TRIG_SLOPE_POS, tr_level: '0.0', tr_delay: '0', tr_chan: '0', tr_tag: '""', gui_hint: tabs@4, label1: '"Tx (ideal)"', label2: '"Rx"', label3: '''''', label4: '''''', label5: '''''', label6: '''''', label7: '''''', label8: '''''', label9: '''''', label10: ''''''}
+  states:
+    bus_sink: false
+    bus_source: false
+    bus_structure: null
+    coordinate: [2000, 1400]
+    rotation: 0
+    state: enabled
+connections:
+- [bits_src, '0', nrz, '0']
+- [nrz, '0', rep, '0']
+- [rep, '0', fsk_mod, '0']
+- [fsk_mod, '0', throttle, '0']
+- [imp_unif, '0', imp_gate, '0']
+- [imp_gate, '0', imp_gate_c, '0']
+- [imp_gate, '0', imp_gate_c, '1']
+- [imp_gauss, '0', impulsos, '0']
+- [imp_gate_c, '0', impulsos, '1']
+- [tono_int, '0', suma_int, '0']
+- [impulsos, '0', suma_int, '1']
+- [throttle, '0', rx_sin_ruido, '0']
+- [suma_int, '0', rx_sin_ruido, '1']
+- [throttle, '0', canal, '0']
+- [awgn, '0', canal, '1']
+- [suma_int, '0', canal, '2']
+- [throttle, '0', tx_rot1, '0']
+- [tx_rot1, '0', tx_int1, '0']
+- [tx_int1, '0', tx_env1, '0']
+- [tx_env1, '0', tx_m1, '0']
+- [throttle, '0', tx_rot0, '0']
+- [tx_rot0, '0', tx_int0, '0']
+- [tx_int0, '0', tx_env0, '0']
+- [tx_env0, '0', tx_m0, '0']
+- [tx_m1, '0', tx_ed, '0']
+- [tx_m0, '0', tx_ed, '1']
+- [rx_sin_ruido, '0', rsr_rot1, '0']
+- [rsr_rot1, '0', rsr_int1, '0']
+- [rsr_int1, '0', rsr_env1, '0']
+- [rsr_env1, '0', rsr_m1, '0']
+- [rx_sin_ruido, '0', rsr_rot0, '0']
+- [rsr_rot0, '0', rsr_int0, '0']
+- [rsr_int0, '0', rsr_env0, '0']
+- [rsr_env0, '0', rsr_m0, '0']
+- [rsr_m1, '0', rsr_ed, '0']
+- [rsr_m0, '0', rsr_ed, '1']
+- [canal, '0', rx_rot1, '0']
+- [rx_rot1, '0', rx_int1, '0']
+- [rx_int1, '0', rx_env1, '0']
+- [rx_env1, '0', rx_m1, '0']
+- [canal, '0', rx_rot0, '0']
+- [rx_rot0, '0', rx_int0, '0']
+- [rx_int0, '0', rx_env0, '0']
+- [rx_env0, '0', rx_m0, '0']
+- [rx_m1, '0', rx_ed, '0']
+- [rx_m0, '0', rx_ed, '1']
+- [rx_env1, '0', rx_dif, '0']
+- [rx_env0, '0', rx_dif, '1']
+- [tx_env1, '0', tx_dif, '0']
+- [tx_env0, '0', tx_dif, '1']
+- [rx_dif, '0', rx_dec, '0']
+- [rx_dec, '0', slicer, '0']
+- [bits_src, '0', xor_err, '0']
+- [slicer, '0', xor_err, '1']
+- [xor_err, '0', err_f, '0']
+- [err_f, '0', ber_avg, '0']
+- [ber_avg, '0', ber_num, '0']
+- [ber_avg, '0', ber_probe, '0']
+- [canal, '0', lpf_disc, '0']
+- [lpf_disc, '0', disc_rx, '0']
+- [throttle, '0', disc_tx, '0']
+- [throttle, '0', t_env, '0']
+- [canal, '0', t_env, '1']
+- [throttle, '0', psd, '0']
+- [awgn, '0', psd, '1']
+- [suma_int, '0', psd, '2']
+- [canal, '0', psd, '3']
+- [throttle, '0', const_iq, '0']
+- [rx_sin_ruido, '0', const_iq, '1']
+- [canal, '0', const_iq, '2']
+- [tx_ed, '0', const_dec, '0']
+- [rsr_ed, '0', const_dec, '1']
+- [rx_ed, '0', const_dec, '2']
+- [rep, '0', t_freq, '0']
+- [disc_tx, '0', t_freq, '1']
+- [disc_rx, '0', t_freq, '2']
+- [tx_dif, '0', t_dec, '0']
+- [rx_dif, '0', t_dec, '1']
+metadata: {file_format: 1, grc_version: 3.10.12.0}
